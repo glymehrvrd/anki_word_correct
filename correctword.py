@@ -105,24 +105,24 @@ def correct_segmentation(s):
 
     return False, s
 
+if __name__=="__main__":
+    words_re=re.compile('(\w+\s+)+\w+')
 
-words_re=re.compile('(\w+\s+)+\w+')
+    conn=sqlite3.connect('d:\dell\Documents\Anki\User 1\collection.anki2')
+    for row in conn.execute('select id, flds from notes'):
+        idd, fld = row
+        s_list=[m.group(0) for m in words_re.finditer(fld)]
+        flag = False
+        for s in s_list:
+            # corr, corr_s=correct_dict(s)
+            corr, corr_s=correct_segmentation(s)
 
-conn=sqlite3.connect('d:\Glyme\Documents\Anki\User 1\collection.anki2')
-for row in conn.execute('select id, flds from notes'):
-    idd, fld = row
-    s_list=[m.group(0) for m in words_re.finditer(fld)]
-    flag = False
-    for s in s_list:
-        # corr, corr_s=correct_dict(s)
-        corr, corr_s=correct_segmentation(s)
-
-        if corr:
-            flag=True
-            fld=fld.replace(s,corr_s)
-    if flag:
-        conn.execute('update notes set flds=? where id=?', (fld, idd))
-        conn.commit()
+            if corr:
+                flag=True
+                fld=fld.replace(s,corr_s)
+        if flag:
+            conn.execute('update notes set flds=? where id=?', (fld, idd))
+            conn.commit()
 
 
-conn.close()
+    conn.close()
